@@ -1,0 +1,10 @@
+<!-- pdf viewer -->
+<div *ngIf="pdfSrc" class="view-pdf-container">
+    <pdf-viewer class="pdf-viewer" [src]="pdfSrc" [render-text]="true">
+    </pdf-viewer>
+</div>
+
+<!-- no pdf selected -->
+<div *ngIf="pdfSrc === ''" class="view-pdf-container">
+    <p>No PDF selected</p>
+</div>

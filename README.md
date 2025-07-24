@@ -1,59 +1,84 @@
 # PDFExtracter
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.1.
+This project is a web application for uploading, viewing, and interacting with PDF files using a chat-based interface. It is built with Angular, Angular Material, and TypeScript.
 
-## Development server
+## Project Overview
 
-To start a local development server, run:
+PDFExtracter allows users to:
+- Upload PDF files via drag-and-drop or file picker
+- View PDF files directly in the browser
+- Interact with an AI-powered chat to ask questions about the uploaded PDF
+- Receive a summary and suggested questions for each PDF
+
+## Tech Stack & Dependencies
+
+- **Angular:** 20.1.0 (CLI: 20.1.1)
+- **TypeScript:** 5.8.2
+- **Angular Material:** 20.1.2
+- **ng2-pdf-viewer:** 10.4.0 (for in-browser PDF rendering)
+- **RxJS:** 7.8.0
+- **Karma/Jasmine:** for unit testing
+
+## UI & Features
+
+- **Material Design:** Uses Angular Material for a modern, responsive UI (buttons, inputs, cards, progress spinners, etc.)
+- **PDF Upload:** Drag-and-drop or click to upload. Shows progress spinner during upload.
+- **PDF Viewer:** Embedded PDF viewer with page navigation.
+- **Chat Interface:** Ask questions about the PDF, get AI-generated answers, summary, and suggested questions.
+- **Responsive Layout:** Optimized for desktop and mobile.
+
+## Main Components
+
+- `PdfUpload`: Handles file upload, drag-and-drop, and manages PDF state.
+- `ViewPdf`: Renders the PDF using ng2-pdf-viewer.
+- `Chat`: Provides a chat interface for interacting with the AI about the PDF content.
+
+## Backend Integration
+
+- **Upload Endpoint:** `POST http://localhost:3000/upload` (expects a PDF file, returns filename)
+- **Chat Endpoint:** `POST http://localhost:3000/chat` (expects `{ question, filename }`, returns AI response)
+
+> **Note:** You need a backend server running at `localhost:3000` that implements these endpoints.
+
+## Getting Started
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Development server
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Navigate to `http://localhost:4200/`. The app will reload if you change any source files.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+### Building
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Running unit tests
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+## Folder Structure
 
-For end-to-end (e2e) testing, run:
+- `src/app/components/pdf-upload/` – PDF upload and viewer components
+- `src/app/components/chat/` – Chat interface
+- `src/app/services/` – Upload and chat service logic
 
-```bash
-ng e2e
-```
+## Styling & Themes
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- Uses SCSS for component styles
+- Includes Angular Material's Azure Blue prebuilt theme
 
-## Additional Resources
+## License
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+MIT

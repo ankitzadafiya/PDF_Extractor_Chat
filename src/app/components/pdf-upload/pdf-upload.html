@@ -1,0 +1,49 @@
+<!-- <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar> -->
+<!-- loader overlay & above progress bar commenting and using this instead -->
+<div *ngIf="isLoading" class="loader-overlay">
+    <mat-spinner [diameter]="60" strokeWidth="5"></mat-spinner>
+    <p class="loader-text">Uploading PDF...</p>
+</div>
+<!-- pdf upload main container -->
+<div class="pdf-upload-main-container">
+    <div class="upload-wrapper" *ngIf="!pdfUploaded">
+        <div class="upload-dropzone" (click)="fileInput.click()" (dragover)="onDragOver($event)"
+            (drop)="onDrop($event)">
+
+            <div class="upload-hint-arrow">
+                <span>DRAG + DROP YOUR<br>PDF FILE HERE</span>
+            </div>
+
+            <div class="upload-content">
+                <div class="upload-icon-bg">
+                    <mat-icon class="upload-icon">upload</mat-icon>
+                </div>
+
+                <div class="upload-text-main">Click to upload, or drag PDF here</div>
+                <button class="upload-btn" (click)="$event.stopPropagation(); fileInput.click();">
+                    <mat-icon>upload</mat-icon> Upload PDF
+                </button>
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept="application/pdf" hidden>
+            </div>
+        </div>
+    </div>
+
+    <!-- chat & pdf viewer container -->
+    <div class="chat-pdf-viewer-container" *ngIf="pdfUploaded">
+        <div class="pdf-viewer-section">
+            <div class="pdf-header">
+                <mat-icon>description</mat-icon>
+                <span class="pdf-filename">{{ fileNameToDisplay }}</span>
+            </div>
+            <!-- pdf viewer -->
+            <div class="pdf-viewer">
+                <app-view-pdf [pdfSrc]="pdfSrc"></app-view-pdf>
+            </div>
+        </div>
+        <!-- chat -->
+        <div class="chat-section">
+            <app-chat [filename]="uploadedFilename" [summary]="summary"
+                [suggestedQuestions]="suggestedQuestions"></app-chat>
+        </div>
+    </div>
+</div>

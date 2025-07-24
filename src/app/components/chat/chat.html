@@ -1,0 +1,48 @@
+<div id="main-app-wrapper">
+  <div class="chat-container">
+    <!-- chat header -->
+    <div class="chat-header">
+      <mat-icon>chat</mat-icon>
+      <span class="chat-title">Chat</span>
+    </div>
+    <!-- chat welcome & suggested questions -->
+    <div class="chat-welcome" *ngIf="summary">
+      <p class="welcome-message">Hey! Nice to see you here.</p>
+      <div class="suggested-questions" *ngIf="suggestedQuestions?.length">
+        <button mat-stroked-button *ngFor="let q of suggestedQuestions" (click)="sendMessage(q)">
+          {{ q }}
+        </button>
+      </div>
+    </div>
+    <!-- chat messages | Live chat -->
+    <div class="messages">
+      <div *ngFor="let msg of messages" [ngClass]="msg.sender">
+        <div class="label">{{ msg.sender === 'user' ? 'You:' : 'AI:' }}</div>
+        <div class="msg-text">{{ msg.text }}</div>
+
+        <!-- <div class="citations" *ngIf="msg.sender === 'bot' && msg.citations?.length">
+          <button class="custom-button" mat-stroked-button *ngFor="let page of msg.citations" (click)="goToPage(page)">
+            See Page {{ page }}
+          </button>
+        </div> -->
+      </div>
+      <!-- Loading Spinner -->
+      <div class="loading" *ngIf="isLoading">
+        <mat-spinner diameter="25"></mat-spinner>
+        <span>AI is typing...</span>
+      </div>
+      <div #messagesEnd></div>
+    </div>
+
+    <!-- chat input box -->
+    <div class="input-box">
+      <mat-form-field appearance="outline" class="input-full">
+        <input matInput [(ngModel)]="userInput" placeholder="Type your message..." (keyup.enter)="sendMessage()" />
+      </mat-form-field>
+      <!-- chat send button (using icon)-->
+      <button mat-icon-button color="primary" (click)="sendMessage()">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
