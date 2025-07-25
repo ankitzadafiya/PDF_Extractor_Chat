@@ -11,6 +11,6 @@ export class Upload {
   uploadPdf(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('pdf', file);
-    return this.http.post<any>('http://localhost:3000/upload', formData);
+    return this.http.post<any>('https://pdf-extractor-chat-1.onrender.com/upload', formData);
   }
 }

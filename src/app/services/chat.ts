@@ -10,6 +10,6 @@ export class Chat {
 
   sendMessage(question: string, filename: string): Observable<any> {
     const body = { question, filename };
-    return this.http.post<any>('http://localhost:3000/chat', body);
+    return this.http.post<any>('https://pdf-extractor-chat-1.onrender.com/chat', body);
   }
 }
