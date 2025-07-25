@@ -16,7 +16,12 @@ const { CohereClient } = require('cohere-ai'); // Cohere SDK for embeddings
 
 // ✅ Initialize Express app
 const app = express();
-app.use(cors({ origin: 'http://localhost:4200' })); // Allow frontend on port 4200
+
+// ✅ Enable CORS for local and deployed frontend (update domain later if needed)
+app.use(cors({
+  origin: ['http://localhost:4200', 'https://your-vercel-frontend.vercel.app'] // ← update Vercel URL here later
+}));
+
 app.use(express.json()); // Parse JSON request bodies
 
 // ✅ Configure multer for file uploads (stored in 'uploads/' directory)
