@@ -1,0 +1,7 @@
+[build]
+publish = "dist/pdf-extracter
+
+[[redirects]]
+from = "/*"
+to = "./index.html"
+status = 200
