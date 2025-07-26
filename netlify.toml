@@ -2,12 +2,6 @@
   command = "npm run build"
   publish = "dist/PDF-Extracter"
 
-[[plugins]]
-  package = "@netlify/angular-runtime"
-
-  [plugins.inputs]
-    skip = true
-
 [[redirects]]
   from = "/*"
   to = "/index.html"
