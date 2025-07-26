@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/PDF-Extracter",
+            "outputPath": "dist/PDF-Extracter/browser",
             "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
@@ -28,7 +28,8 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/_redirects" 
             ],
             "styles": [
               "src/styles.scss",
