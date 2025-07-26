@@ -1,6 +1,6 @@
 [build]
   command = "npm run build"
-  publish = "dist/PDF-Extracter"
+  publish = "dist/PDF-Extracter/browser"
 
 [[redirects]]
   from = "/*"
