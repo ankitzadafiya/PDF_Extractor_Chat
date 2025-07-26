@@ -152,10 +152,16 @@
   .pdf-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    // margin-bottom: 1rem; //removing as of now
     color: #333;
+  }
+
+  .pdf-header-left {
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
   }
 
@@ -163,7 +169,6 @@
     font-size: 1.1rem;
     font-weight: 500;
     color: #444;
-    margin-left: 0.5rem;
   }
 
   .pdf-viewer {

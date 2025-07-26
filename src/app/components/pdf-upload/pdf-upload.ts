@@ -13,10 +13,11 @@ import { HttpClient } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { Upload } from '../../services/upload';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-pdf-upload',
-  imports: [PdfViewerModule, MatButtonModule, MatInputModule, MatFormFieldModule, MatIconModule,
+  imports: [PdfViewerModule, MatButtonModule, MatInputModule, MatFormFieldModule, MatIconModule, MatTooltipModule,
     CommonModule, MatCardModule, MatIconModule, ViewPdf, MatProgressBarModule, Chat, MatProgressSpinnerModule],
   templateUrl: './pdf-upload.html',
   styleUrl: './pdf-upload.scss',
@@ -160,5 +161,15 @@ export class PdfUpload {
     if (event.dataTransfer && event.dataTransfer.files.length > 0) {
       this.onFileSelected({ target: { files: event.dataTransfer.files } });
     }
+  }
+
+  /**
+   * restart is a function that is called when the restart button is clicked.
+   * It reloads the page and restart the pdf upload process.
+   *
+   * @memberof PdfUpload
+   */
+  restart() {
+    window.location.href = '/';
   }
 }

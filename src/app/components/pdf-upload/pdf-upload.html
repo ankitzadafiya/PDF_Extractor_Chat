@@ -32,8 +32,14 @@
     <div class="chat-pdf-viewer-container" *ngIf="pdfUploaded">
         <div class="pdf-viewer-section">
             <div class="pdf-header">
-                <mat-icon>description</mat-icon>
-                <span class="pdf-filename">{{ fileNameToDisplay }}</span>
+                <div class="pdf-header-left">
+                    <mat-icon>description</mat-icon>
+                    <span class="pdf-filename">{{ fileNameToDisplay }}</span>
+                </div>
+                <button mat-icon-button (click)="restart()" matTooltip="Reset & Upload another PDF"
+                    matTooltipPosition="below">
+                    <mat-icon>restart_alt</mat-icon>
+                </button>
             </div>
             <!-- pdf viewer -->
             <div class="pdf-viewer">
