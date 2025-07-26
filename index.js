@@ -19,8 +19,12 @@ const app = express();
 
 // ✅ Enable CORS for local and deployed frontend (update domain later if needed)
 app.use(cors({
-  origin: ['http://localhost:4200', 'https://your-vercel-frontend.vercel.app'] // ← update Vercel URL here later
+  origin: [
+    'http://localhost:4200',
+    'https://elegant-genie-d3a66c.netlify.app'
+  ]
 }));
+
 
 app.use(express.json()); // Parse JSON request bodies
 
