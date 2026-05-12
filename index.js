@@ -1,55 +1,54 @@
-// ✅ Load environment variables from .env file
+// ✅ Load environment variables
 require('dotenv').config();
 
-// ✅ Core Express app setup
+// ✅ Core modules and middleware
 const express = require('express');
-const multer = require('multer'); // Handles multipart/form-data for file uploads
-const pdfParse = require('pdf-parse'); // Parses and extracts text from PDF files
-const fs = require('fs'); // File system module for reading/writing files
-const path = require('path'); // Utility for handling file paths
-const cors = require('cors'); // Enables Cross-Origin Resource Sharing
-const crypto = require('crypto'); // Used for creating MD5 hash of PDF contents (caching)
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const cors = require('cors');
+const crypto = require('crypto');
+
+// ✅ PDF parser using pdfjs-dist (v2.16.105)
+const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
+// Must be a string path — require() returns an object and breaks fake-worker setup in Node.
+pdfjsLib.GlobalWorkerOptions.workerSrc = require.resolve('pdfjs-dist/legacy/build/pdf.worker.js');
 
 // ✅ AI SDKs
-const { OpenAI } = require('openai'); // Groq-compatible LLM client using OpenAI-compatible SDK
-const { CohereClient } = require('cohere-ai'); // Cohere SDK for embeddings
+const { OpenAI } = require('openai');
+const { CohereClient } = require('cohere-ai');
 
 // ✅ Initialize Express app
 const app = express();
-
-// ✅ Enable CORS for local and deployed frontend (update domain later if needed)
 app.use(cors({
   origin: [
     'http://localhost:4200',
     'https://elegant-genie-d3a66c.netlify.app'
   ]
 }));
-
-
-app.use(express.json()); // Parse JSON request bodies
-
-// ✅ Configure multer for file uploads (stored in 'uploads/' directory)
+app.use(express.json());
 const upload = multer({ dest: 'uploads/' });
 
-// ✅ Folder to store embeddings (vector database)
+// ✅ Vector store directory
 const VECTOR_DIR = './vectorstore';
-if (!fs.existsSync(VECTOR_DIR)) fs.mkdirSync(VECTOR_DIR); // Create if it doesn't exist
+if (!fs.existsSync(VECTOR_DIR)) fs.mkdirSync(VECTOR_DIR);
 
-// ✅ Initialize AI clients
-const co = new CohereClient({ apiKey: process.env.CO_API_KEY }); // Cohere for embeddings
+// ✅ AI clients
+const co = new CohereClient({ apiKey: process.env.CO_API_KEY });
 const openai = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY, // Groq API key (used as OpenAI-compatible)
-  baseURL: 'https://api.groq.com/openai/v1' // Groq’s base URL for OpenAI-compatible API
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: 'https://api.groq.com/openai/v1'
 });
+const DEFAULT_GROQ_MODELS = ['llama-3.1-8b-instant', 'llama3-70b-8192'];
 
-// 🔐 Generate MD5 hash for deduplication/caching based on file content
+// 🔐 Generate MD5 hash
 function getFileHash(buffer) {
   return crypto.createHash('md5').update(buffer).digest('hex');
 }
 
-// 📚 Chunk extracted text into manageable sizes (~500 characters per chunk)
+// 📚 Chunk text ~500 characters
 function chunkText(text, chunkSize = 500) {
-  const paragraphs = text.split('\n\n'); // Break text by double newline
+  const paragraphs = text.split('\n\n');
   const chunks = [];
   let currentChunk = '';
 
@@ -61,49 +60,96 @@ function chunkText(text, chunkSize = 500) {
     currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
   }
 
-  if (currentChunk) chunks.push(currentChunk); // Push remaining chunk
+  if (currentChunk) chunks.push(currentChunk);
   return chunks;
 }
 
-// 🔎 Compute cosine similarity between two embedding vectors
-function cosineSimilarity(vecA, vecB) {
-  const dot = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
-  const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
-  const magB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
-  return dot / (magA * magB); // Cosine formula
+function getCandidateModels() {
+  const envModels = (process.env.GROQ_MODELS || process.env.GROQ_MODEL || '')
+    .split(',')
+    .map(m => m.trim())
+    .filter(Boolean);
+
+  return [...new Set([...envModels, ...DEFAULT_GROQ_MODELS])];
 }
 
-// 📤 Upload endpoint → Parses PDF, creates embeddings and caches
+async function createChatCompletionWithFallback(messages) {
+  const candidates = getCandidateModels();
+  let lastErr = null;
+
+  for (const model of candidates) {
+    try {
+      return await openai.chat.completions.create({ model, messages });
+    } catch (err) {
+      lastErr = err;
+      const errMsg = (err && err.message ? err.message : '').toLowerCase();
+      const shouldTryNext =
+        errMsg.includes('decommissioned') ||
+        errMsg.includes('no longer supported') ||
+        errMsg.includes('not found') ||
+        errMsg.includes('model');
+
+      if (!shouldTryNext) throw err;
+    }
+  }
+
+  throw lastErr || new Error('No supported Groq model available.');
+}
+
+// 📄 Extract text by page using pdfjs
+async function extractTextByPage(buffer) {
+  const loadingTask = pdfjsLib.getDocument({ data: buffer });
+  const pdf = await loadingTask.promise;
+  const pages = [];
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const strings = content.items.map(item => item.str);
+    const text = strings.join(' ');
+    pages.push({ pageNumber: i, text });
+  }
+
+  return pages;
+}
+
+// 📤 Upload endpoint
 app.post('/upload', upload.single('pdf'), async (req, res) => {
   try {
     const file = req.file;
-    const dataBuffer = fs.readFileSync(file.path); // Read uploaded PDF
-    const fileHash = getFileHash(dataBuffer); // Generate unique hash
+    const dataBuffer = fs.readFileSync(file.path);
+    const fileHash = getFileHash(dataBuffer);
     const vectorPath = path.join(VECTOR_DIR, `${fileHash}.json`);
 
-    // 🧠 If already processed, return cached result
     if (fs.existsSync(vectorPath)) {
       return res.json({ message: '✅ PDF already processed (cached)', filename: fileHash });
     }
 
-    const data = await pdfParse(dataBuffer); // Extract text from PDF
-    const chunks = chunkText(data.text, 500); // Chunk extracted text
+    const pages = await extractTextByPage(dataBuffer);
+    const chunks = [];
 
-    // 🔁 Generate embeddings for each chunk using Cohere
-    const embeddingPromises = chunks.map(async (chunk) => {
+    for (const { pageNumber, text } of pages) {
+      const pageChunks = chunkText(text, 500);
+      for (const chunk of pageChunks) {
+        chunks.push({ text: chunk, pageNumber });
+      }
+    }
+
+    const embeddingPromises = chunks.map(async ({ text, pageNumber }) => {
       const embedResponse = await co.embed({
-        texts: [chunk],
+        texts: [text],
         model: 'embed-english-v3.0',
-        input_type: 'search_document' // For document indexing
+        input_type: 'search_document'
       });
       return {
-        text: chunk,
+        text,
+        pageNumber,
         embedding: embedResponse.embeddings[0]
       };
     });
 
-    const chunkEmbeddings = await Promise.all(embeddingPromises); // Wait for all chunks
-    fs.writeFileSync(vectorPath, JSON.stringify(chunkEmbeddings, null, 2)); // Save embeddings
+    const chunkEmbeddings = await Promise.all(embeddingPromises);
+    fs.writeFileSync(vectorPath, JSON.stringify(chunkEmbeddings, null, 2));
 
     console.log(`✅ Uploaded & vectorized → ${fileHash} (${chunks.length} chunks)`);
     res.json({ message: '✅ PDF parsed & vectorized', filename: fileHash });
@@ -113,51 +159,48 @@ app.post('/upload', upload.single('pdf'), async (req, res) => {
   }
 });
 
-// 💬 Chat endpoint → Accepts a question and returns an answer using Groq
+// 💬 Chat endpoint
 app.post('/chat', async (req, res) => {
   try {
     const { question, filename } = req.body;
     const vectorPath = path.join(VECTOR_DIR, `${filename}.json`);
 
-    // 🛑 Return error if file not found
     if (!fs.existsSync(vectorPath)) {
       return res.status(404).json({ error: '❌ File not indexed. Upload first!' });
     }
 
-    const chunks = JSON.parse(fs.readFileSync(vectorPath, 'utf-8')); // Load stored embeddings
+    const chunks = JSON.parse(fs.readFileSync(vectorPath, 'utf-8'));
 
-    // 🧠 Embed the user's question
     const embedResponse = await co.embed({
       texts: [question],
       model: 'embed-english-v3.0',
-      input_type: 'search_query' // For querying
+      input_type: 'search_query'
     });
     const questionEmbedding = embedResponse.embeddings[0];
 
-    // 🔎 Score each chunk by similarity to the question
     const scored = chunks.map(chunk => ({
       text: chunk.text,
+      pageNumber: chunk.pageNumber,
       score: cosineSimilarity(questionEmbedding, chunk.embedding)
     }));
 
-    // 🏆 Take top 2 most relevant chunks
     const topChunks = scored.sort((a, b) => b.score - a.score).slice(0, 2);
-    const context = topChunks.map(c => c.text).join('\n\n'); // Combine as context
+    const context = topChunks.map(c => c.text).join('\n\n');
 
-    // 🗣️ Ask Groq LLM to generate an answer based on selected context
-    const completion = await openai.chat.completions.create({
-      model: 'llama3-8b-8192',
-      messages: [
-        { role: 'system', content: 'You are a helpful assistant. Answer concisely using only the given context.' },
-        { role: 'user', content: `Context:\n\n${context}\n\nQuestion: ${question}` }
-      ]
-    });
+    const completion = await createChatCompletionWithFallback([
+      { role: 'system', content: 'You are a helpful assistant. Answer concisely using only the given context.' },
+      { role: 'user', content: `Context:\n\n${context}\n\nQuestion: ${question}` }
+    ]);
 
-    // ✅ Return final answer to frontend
+    const uniqueCitations = [...new Set(topChunks.map(c => c.pageNumber))].map(page => ({ page }));
+
+    console.log("🔎 Top Chunks for Citations:", topChunks);
+
     res.json({
       answer: completion.choices[0].message.content || '',
       model: completion.model,
-      created_at: completion.created
+      created_at: completion.created,
+      citations: uniqueCitations
     });
   } catch (err) {
     console.error(err);
@@ -165,13 +208,17 @@ app.post('/chat', async (req, res) => {
   }
 });
 
+// 🔎 Cosine similarity
+function cosineSimilarity(vecA, vecB) {
+  const dot = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
+  const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
+  const magB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
+  return dot / (magA * magB);
+}
+
 // 🚀 Start server
 const PORT = 3000;
 app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
-
-// End of Streamed Ollama Code
-
-
 
 
 
