@@ -23,7 +23,8 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:4200',
-    'https://elegant-genie-d3a66c.netlify.app'
+    'https://elegant-genie-d3a66c.netlify.app',
+    'https://pdf-extractor-project.netlify.app'
   ]
 }));
 app.use(express.json());
