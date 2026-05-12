@@ -8,7 +8,7 @@
     <!-- chat welcome & suggested questions -->
     <div class="chat-welcome" *ngIf="summary">
       <p class="welcome-message">Hey! Nice to see you here.</p>
-      <div class="suggested-questions" *ngIf="suggestedQuestions?.length">
+      <div class="suggested-questions" *ngIf="suggestedQuestions.length">
         <button mat-stroked-button *ngFor="let q of suggestedQuestions" (click)="sendMessage(q)">
           {{ q }}
         </button>
@@ -19,9 +19,9 @@
       <div *ngFor="let msg of messages" [ngClass]="msg.sender">
         <div class="label">{{ msg.sender === 'user' ? 'You:' : 'AI:' }}</div>
         <div class="msg-text">{{ msg.text }}</div>
-
-        <!-- <div class="citations" *ngIf="msg.sender === 'bot' && msg.citations?.length">
-          <button class="custom-button" mat-stroked-button *ngFor="let page of msg.citations" (click)="goToPage(page)">
+<!-- 
+        <div class="citations" *ngIf="msg.sender === 'bot' && msg.citations?.length">
+          <button mat-stroked-button *ngFor="let page of msg.citations" (click)="goToPage(page)">
             See Page {{ page }}
           </button>
         </div> -->

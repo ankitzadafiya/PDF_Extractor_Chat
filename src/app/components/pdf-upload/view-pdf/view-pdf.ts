@@ -19,6 +19,9 @@ export class ViewPdf {
    */
   @Input() pdfSrc: string = '';
 
+  @Input() onPageNavigate!: (page: number) => void; // From parent
+
+
   constructor() {}
 
 }

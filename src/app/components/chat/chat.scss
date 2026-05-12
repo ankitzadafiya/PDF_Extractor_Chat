@@ -121,13 +121,19 @@ body {
     white-space: pre-wrap;
   }
 
-  // .citations {
-  //   margin-top: 0.3rem;
-
-  //   button {
-  //     margin-right: 0.3rem;
-  //   }
-  // }
+  .citations {
+    margin-top: 0.3rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  
+    button {
+      font-size: 0.8rem;
+      border-radius: 16px;
+      padding: 0.2rem 0.8rem;
+    }
+  }
+  
 
   .input-box {
     display: flex;

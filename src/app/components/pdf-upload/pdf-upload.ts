@@ -93,6 +93,11 @@ export class PdfUpload {
    */
   fileNameToDisplay: string = '';
 
+  /** Visual state when a file is dragged over the dropzone */
+  isDragOver = false;
+
+  private dragDepth = 0;
+
   constructor(private uploadService: Upload) { }
 
   /**
@@ -103,6 +108,7 @@ export class PdfUpload {
    * @memberof PdfUpload
    */
   onFileSelected(event: any) {
+    this.clearDragState();
     const file: File = event.target.files[0];
     console.log(file);
     this.fileNameToDisplay = file?.name;
@@ -149,6 +155,25 @@ export class PdfUpload {
     event.stopPropagation();
   }
 
+  onDragEnter(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDepth++;
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDepth = Math.max(0, this.dragDepth - 1);
+    this.isDragOver = this.dragDepth > 0;
+  }
+
+  private clearDragState(): void {
+    this.dragDepth = 0;
+    this.isDragOver = false;
+  }
+
   /**
    * This function is called when a file is dropped on the component.
    *
@@ -158,6 +183,7 @@ export class PdfUpload {
   onDrop(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
+    this.clearDragState();
     if (event.dataTransfer && event.dataTransfer.files.length > 0) {
       this.onFileSelected({ target: { files: event.dataTransfer.files } });
     }

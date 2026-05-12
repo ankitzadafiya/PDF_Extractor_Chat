@@ -54,7 +54,7 @@ export class Chat implements OnChanges {
    * @type {{ sender: string; text: string; }[]}
    * @memberof Chat
    */
-  messages: { sender: string; text: string; }[] = [];
+  messages: { sender: string; text: string; citations?: number[] }[] = [];
 
   /**
    * userInput is the input that the user has typed in the chat.
@@ -79,6 +79,7 @@ export class Chat implements OnChanges {
    * @memberof Chat
    */
   isLoading = false;
+  onPageNavigate: any;
 
   constructor(private chatService: ChatService) { }
 
@@ -112,8 +113,9 @@ export class Chat implements OnChanges {
     this.chatService.sendMessage(input, this.filename).subscribe({
       next: (response) => {
         const botText = response.answer;
+        const citations = response.citations || [];
 
-        this.messages.push({ sender: 'bot', text: botText });
+        this.messages.push({ sender: 'bot', text: botText, citations });
         this.isLoading = false;
         this.scrollToBottom();
       },
@@ -128,10 +130,14 @@ export class Chat implements OnChanges {
     this.userInput = '';
   }
 
-  // goToPage(page: number) {
-  //   console.log(`Navigate to page ${page}`);
-  //   // TODO: Connect this with your PDF viewer to scroll to the page!
-  // }
+  goToPage(page: number) {
+    if (this.onPageNavigate) {
+      this.onPageNavigate(page);
+    } else {
+      console.warn('Page navigation handler not provided!');
+    }
+  }
+  
 
   /**
    * scrollToBottom is a function that is used to scroll to the bottom of the chat.

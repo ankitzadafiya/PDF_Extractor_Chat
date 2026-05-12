@@ -1,3 +1,13 @@
+@use 'sass:color';
+
+// --- Front page (empty state) ---
+$purple-600: #7c3aed;
+$purple-500: #8b5cf6;
+$purple-tint: #f5f3ff;
+$purple-deep: #6d28d9;
+$ink: #18181b;
+$ink-muted: #52525b;
+
 .pdf-upload-main-container {
   height: 100%;
   width: 100%;
@@ -10,57 +20,125 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100%;
+    min-height: 100%;
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem);
+    background:
+      radial-gradient(ellipse 120% 80% at 50% -20%, rgba(139, 92, 246, 0.18), transparent 55%),
+      radial-gradient(ellipse 80% 50% at 100% 50%, rgba(167, 139, 250, 0.08), transparent 45%),
+      radial-gradient(ellipse 60% 40% at 0% 80%, rgba(124, 58, 237, 0.06), transparent 40%),
+      linear-gradient(180deg, #fafafa 0%, #f4f4f5 100%);
+  }
+
+  .upload-hero {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .upload-hero-header {
+    text-align: center;
+    max-width: 34rem;
+  }
+
+  .upload-hero-eyebrow {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    text-transform: uppercase;
+    color: $purple-600;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .upload-hero-title {
+    margin: 0 0 0.625rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: $ink;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.2;
+  }
+
+  .upload-hero-subtitle {
+    margin: 0;
+    font-size: clamp(0.9375rem, 2vw, 1.0625rem);
+    font-weight: 400;
+    line-height: 1.55;
+    color: $ink-muted;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   .upload-dropzone {
     position: relative;
-    width: 80vw;
-    max-width: 700px;
-    min-height: 350px;
-    background: #fcfaff;
-    border: 2.5px dashed #a259f7;
-    border-radius: 18px;
+    width: 100%;
+    max-width: 640px;
+    min-height: min(52vh, 380px);
+    padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 4vw, 2.5rem);
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, $purple-tint 100%);
+    border: 2px dashed rgba(124, 58, 237, 0.45);
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: border-color 0.2s;
-    margin: 2rem auto;
-    box-shadow: 0 2px 16px 0 rgba(162, 89, 247, 0.04);
+    margin: 0 auto;
+    box-shadow:
+      0 1px 2px rgba(24, 24, 27, 0.04),
+      0 12px 40px -12px rgba(124, 58, 237, 0.2);
     overflow: visible;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.25s ease,
+      background 0.25s ease,
+      transform 0.2s ease;
 
     &:hover {
-      border-color: #7c3aed;
+      border-color: rgba(124, 58, 237, 0.65);
+      box-shadow:
+        0 1px 2px rgba(24, 24, 27, 0.05),
+        0 16px 48px -10px rgba(124, 58, 237, 0.28);
+    }
+
+    &:focus-visible {
+      border-color: $purple-600;
+      box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.95),
+        0 0 0 6px rgba(124, 58, 237, 0.35);
+    }
+
+    &--active {
+      border-color: $purple-500;
+      border-style: solid;
+      background: linear-gradient(145deg, #ffffff 0%, #ede9fe 100%);
+      box-shadow:
+        0 0 0 1px rgba(139, 92, 246, 0.25),
+        0 20px 50px -15px rgba(124, 58, 237, 0.35);
+      transform: scale(1.01);
     }
   }
 
-  .upload-hint-arrow {
+  .upload-hint-corner {
     position: absolute;
-    top: 18px;
-    right: 28px;
+    top: 1rem;
+    right: 1.25rem;
+    margin: 0;
+    max-width: 11rem;
     text-align: right;
     z-index: 2;
-    color: #7c3aed;
-    font-family: 'Inter', sans-serif;
-    font-size: 1.05rem;
+    color: $purple-600;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.35;
     pointer-events: none;
-
-    span {
-      display: block;
-      margin-bottom: -10px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #7c3aed;
-    }
-
-    svg {
-      display: block;
-      margin-left: auto;
-      margin-top: -10px;
-    }
+    opacity: 0.95;
   }
 
   .upload-content {
@@ -70,61 +148,105 @@
     justify-content: center;
     width: 100%;
     z-index: 1;
+    gap: 0;
   }
 
   .upload-icon-bg {
+    width: 4.5rem;
+    height: 4.5rem;
     background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px 0 rgba(162, 89, 247, 0.12);
-    padding: 15px 20px 15px 20px;
-    margin-bottom: 1.5rem;
+    border-radius: 14px;
+    box-shadow:
+      0 1px 2px rgba(24, 24, 27, 0.06),
+      0 8px 24px -6px rgba(124, 58, 237, 0.25);
+    margin-bottom: 1.375rem;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .upload-icon {
-    font-size: 2.5rem;
-    height: fit-content;
-    color: #a259f7;
+    font-family: 'Material Icons';
+    font-size: 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    color: $purple-500;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: visible;
+    font-style: normal;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
   }
 
   .upload-text-main {
-    font-size: 1.35rem;
+    font-size: clamp(1.0625rem, 2.5vw, 1.25rem);
     font-weight: 700;
-    color: #18181b;
-    margin-bottom: 1.5rem;
+    color: $ink;
+    margin: 0 0 0.375rem;
     text-align: center;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.35;
+  }
+
+  .upload-text-hint {
+    margin: 0 0 1.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $ink-muted;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   .upload-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    background: #a259f7;
+    background: linear-gradient(180deg, $purple-500 0%, $purple-600 100%);
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
+    font-family: 'Inter', system-ui, sans-serif;
     border: none;
     border-radius: 12px;
-    padding: 0.7rem 2.2rem;
-    margin-top: 0.5rem;
-    box-shadow: 0 2px 8px 0 rgba(162, 89, 247, 0.08);
+    padding: 0.75rem 1.75rem;
+    box-shadow:
+      0 1px 2px rgba(24, 24, 27, 0.1),
+      0 4px 14px -2px rgba(124, 58, 237, 0.45);
     cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
     outline: none;
 
     &:hover {
-      background: #7c3aed;
-      box-shadow: 0 4px 16px 0 rgba(162, 89, 247, 0.12);
+      background: linear-gradient(180deg, color.adjust($purple-500, $lightness: 3%) 0%, $purple-deep 100%);
+      box-shadow:
+        0 2px 4px rgba(24, 24, 27, 0.12),
+        0 8px 22px -2px rgba(124, 58, 237, 0.5);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 2px #fff,
+        0 0 0 5px rgba(124, 58, 237, 0.45),
+        0 4px 14px -2px rgba(124, 58, 237, 0.45);
     }
 
     mat-icon {
-      font-size: 1.3rem;
+      font-family: 'Material Icons';
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      overflow: visible;
+      font-style: normal;
+      font-weight: normal;
+      text-transform: none;
+      letter-spacing: normal;
     }
   }
 
@@ -155,7 +277,6 @@
     justify-content: space-between;
     font-size: 1.2rem;
     font-weight: 600;
-    // margin-bottom: 1rem; //removing as of now
     color: #333;
   }
 
@@ -214,6 +335,6 @@
     font-size: 1.2rem;
     font-weight: 600;
     color: #7c3aed;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 }
