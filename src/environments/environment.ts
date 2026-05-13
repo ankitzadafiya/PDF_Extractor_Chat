@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://elegant-genie-d3a66c.netlify.app',
+  apiBaseUrl: 'https://pdf-extractor-chat-1.onrender.com',
 };
